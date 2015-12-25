@@ -28,7 +28,7 @@ class Data ( object ):
         """ """
         save =  str("cd " + self.path_location 
                           + " && tar -czpf " 
-                          + path_to_save + "/" + self.name + ".tar.gz"
+                          + "../" + path_to_save + "/" + self.name + ".tar.gz"
                           + " " + self.name)
         res = system(save) # run execute and store result of command 
         if res == 0:
