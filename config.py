@@ -11,7 +11,7 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 CONFIG = {  "DATA":     # Profile
                         { "LONERS": #Path
                                     [script_path + "/test/DATA/save_me.txt",
-                                     script_path +"/test/DATA/folder_for_save",
+                                     script_path +"./test/DATA/folder_for_save",
                                       ],
                          "Project" : ["./"],
                         },
@@ -19,4 +19,3 @@ CONFIG = {  "DATA":     # Profile
                         {"STOR_1" :script_path +"/test/DIR_FOR_BKP",
                          },
          }
-print CONFIG["DATA"]["LONERS"][0]

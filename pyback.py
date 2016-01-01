@@ -1,246 +1,65 @@
 #! /usr/bin/python
 from stordata import Data, Storage 
 from config import CONFIG
-# DEV DEV DEV DEV DEV
+from sys import argv, exit
+from getopt import getopt, GetoptError
+import logging
 
-def init_all_storages():
-    """ 
-    Return storeges with OK status only.
-    If all storeges broken function return empty list
-    """
-    storage_list = [Storage(line) for line in CONFIG["STORAGES"].values()]
-    return [store for store in storage_list if store.get_status()]
-    
-def init_storage(storage_name):
-    """ 
-    This function return one storage object.
-    If storage doesn't exist function return False 
-    """
+# start initialization logging. Take from https://docs.python.org/2/howto/logging-cookbook.html#logging-cookbook
+logger = logging.getLogger(' ')
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler('log.txt')
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+# end logging initialization
+def main(argv):
+    profile_list = []
+    storage_list = []
     try:
-        return Storage(CONFIG["STORAGES"][storage_name])
-        
-    except KeyError:
-        return False
+        opts, args = getopt(argv,"mhd:s:",["data=","storages"])
+    except GetoptError:
+        print "Incorrect key. \nExample: pyback -d PROFILE1,PROFILE2 -s STORAGE1,STORAGE2\n Or try key '-h' for help"
+        exit(2)
+    for opt, arg in opts:
+        if opt == "-h":
+            print "\nExample: pyback -d PROFILE1,PROFILE2 -s STORAGE1,STORAGE2"
+            print "-m for menu"
+            exit()
+        elif opt == "-m":
+            from textMenu import menu
+            menu()
+        elif opt in ('-d', 'data'):
+            for item in arg.split(','):
+                profile_list.append(item)
+        elif opt in ('-s', 'storages'):
+            for item in arg.split(','):
+                storage_list.append(item)
 
-def data_from_profile(profile_name):
-    """Function return list of data from profile"""
-    return [Data(line) for line in CONFIG["DATA"][profile_name]]
-    
-def printf(text):
-
-    print text
-
-
-def menu():
-    """ 
-    This version of menu just for test/dev period.
-    Must be rewritten because it's ugly    
-    """
-    menu_run = True
-    
-    while menu_run:
-        print "Choice menu item \n"
-        print "%s\n%s\n%s" %  ("(C)rete backup", "(R)estore", "(Q)uit")
-        print "-" * 16
-        choice = raw_input("Enter your choice: ")
-        # quit branch
-        if choice.upper() == 'Q':
-            menu_run = False
-        #menu branch for create backup
-        elif choice.upper() == 'C':
-            sub_menu = True
-            choice_set = set()
-            storage_set = set()
-            while sub_menu:
-                print "#" *60
-                num = 1
-                for storage in sorted(CONFIG["STORAGES"].keys()):
-                    print str(num) + ". " + storage + " Location: " + CONFIG["STORAGES"][storage],
-                    if num in choice_set:
-                        print "+"
-                        new_store = Storage(CONFIG["STORAGES"][storage])
-                        if new_store.get_status():
-                            storage_set.add(new_store)
-                        else:
-                            print storage + ": " + "\nBad storage. Check it!" * 3
-                    else:
-                        print ""
-                    num += 1
-                print "\n"
-                print "0." + " Select all storages\n", "(O)k\n", "(Q)uit\n", "(E)xit\n"
-                print "-" * 16
-                choice =  raw_input ("Choise storage(s): ")
-                print "<"
-                if choice.upper() == 'Q':
-                    sub_menu = False
-                elif not choice.isalpha() and int(choice) > 0 and int(choice) < num:
-                    choice_set.add(int(choice))
-                
-                elif choice == '0':
-                    sub_num = 1
-                    for storage in CONFIG["STORAGES"].keys():
-                        new_store = Storage(CONFIG["STORAGES"][storage])
-                        if new_store.get_status():
-                            storage_set.add(new_store)
-                            choice_set.add(sub_num)
-                            sub_num += 1
-                        else:
-                            print storage + ": " + "\nBad storage. Check it!" * 3
-                    
-                elif str(choice).upper() == 'E':
-                    menu_run = False
-                    sub_menu = False
-                elif str(choice).upper() == 'O':
-                    if not storage_set:
-                        print "Storage list is empty"
-                    else:
-                        #new sub menu for choice files profile
-                        sub_sub_menu   = True
-                        sub_choice_set = set()
-                        data_set       = set() 
-                        while sub_sub_menu:
-                            print "\nAll files will be saved in: "
-                            print "/" * 16
-                            [printf("* " + x.name) for x in storage_set]
-                            print "/" * 16, '\n'
-                            num = 1
-                            menu_dict = {}
-                            print "Profiles list: "
-                            for profile in CONFIG["DATA"].keys():
-                                print str(num) + ". " + profile + " ",
-                                if int(num) in sub_choice_set:
-                                    print "+"
-                                    data_set.add(profile)
-                                        
-                                else:
-                                    print " "
-                                menu_dict[num] = profile
-                                num += 1
-                            print "\n0." + " Select all storages\n", "(O)k\n", "(V)iev\n", "(Q)uit\n", "(E)xit"
-                            print "-" * 16
-                            choice = raw_input('Choice action from menu: ')
-                            if choice.upper() == 'Q':
-                                sub_sub_menu = False
-                            elif choice.upper() == 'E':
-                                menu_run = False
-                                sub_menu = False
-                                sub_sub_menu = False
-                            elif choice.upper() == "V":
-                                choice = raw_input("\n Enter Profile number: ")
-                                if int(choice) > 0 and int(choice) <= len(menu_dict.keys()):
-                                    for file in CONFIG["DATA"][menu_dict[int(choice)]]:
-                                        print file
-                            elif not choice.isalpha() and int(choice) > 0 and int(choice) < num:
-                                sub_choice_set.add(int(choice))
-                            
-                            elif choice == '0':
-                                [sub_choice_set.add(x) for x in xrange(1, num)]
-                            elif str(choice).upper() == 'O':
-                                for profile in data_set:
-                                    file_obj_list = [Data(x) for x in CONFIG["DATA"][profile]]
-                                    for storage in storage_set:
-                                        if storage.save(profile, file_obj_list):
-                                            print "error"  # this place for error log
-                                print "BACKUP FINISH!!!!"
-                                sub_menu = False
-                                sub_sub_menu = False
-                            else:
-                                print "There no " + choice + " in menu" 
+    if profile_list and storage_list:
+        logger.info('BackUp start')
+        if set(storage_list) == set(CONFIG["STORAGES"].keys()):
+            storage_obj_list = [Storage(CONFIG["STORAGES"][storage]) for storage in storage_list]
+            # check store status and write to log
+            for obj in storage_obj_list:
+                if obj.get_status():
+                    logger.info(obj.name + " Ok!")
                 else:
-                     print "There no " + choice + " in menu" 
-                
-        elif choice.upper() == 'R':
-        #menu branch for non correct enter
-            sub_menu = True
-            storage = Storage(CONFIG['STORAGES']['STOR_1']) #''
-            date = '20151224'#''
-            profile = 'LONERS'
-            time = '18329'
-            files  = ''
-            while sub_menu:
-                if storage and date: storage.set_current_date(date)
-                if not storage:
-                    print "Set storage"
-                    [printf(x) for x in CONFIG['STORAGES'].keys()]
-                    current_storage = raw_input("Example: "+ CONFIG['STORAGES'].keys()[0] + "\nEnter Storage name: ")
-                    if current_storage in set(CONFIG['STORAGES'].keys()):
-                        storage = Storage(CONFIG['STORAGES'][current_storage])
-                    elif current_storage.upper() == 'Q':
-                        sub_menu = False
+                    logger.error(obj.name + " Check it!!!")
+            for profile in profile_list:
+                data_obj_list = [Data(data) for data in CONFIG["DATA"][profile]]
+                for storage in storage_obj_list:
+                    status = storage.save(profile, data_obj_list)
+                    # if for log
+                    if status:
+                        logger.error("Problem to save data from profile - " + profile)
+                        for data_error in status:
+                            logger.error(data_error)
                     else:
-                        print "No storage with name: " + current_storage
-                elif not date:
-                    print "Set date"
-                    [printf(x) for x in storage.get_date_folders()]
-                    current_date = raw_input("Example: "+ storage.get_date_folders()[0] + "\nEnter date: ")
-                    if current_date in set(storage.get_date_folders()):
-                        date = current_date
-                    elif current_date.upper() == 'Q':
-                        sub_menu = False
-                    else:
-                        print "No date with name: " + current_date
-                    
-                elif not profile:
-                    print "Set profile"
-                    [printf(x) for x in storage.get_profile_folders()]
-                    current_profile = raw_input("Example: "+ storage.get_profile_folders()[0] + "\nEnter Profile name: ")
-                    if current_profile in set(storage.get_profile_folders()):
-                        profile = current_profile
-                    elif current_profile.upper() == 'Q':
-                        sub_menu = False
-                    else:
-                        print "No Profile with name: " + current_profile
-                    
-                elif not time:
-                    print "Set time"
-                    [printf(x) for x in storage.get_time_folders( )]
-                    current_time = raw_input("Example: "+ storage.get_time_folders()[0] + "\nEnter time: ")
-                    if current_time in set(storage.get_time_folders()):
-                        time = current_time
-                    elif current_time.upper() == 'Q':
-                        sub_menu = False
-                    else:
-                        print "No time with name: " + current_time
-                elif not files:
-                    sub_sub_menu = True
-                    files_set = set([Data(x) for x in CONFIG["DATA"][profile]])
-                    restore_set = set()
-                    while sub_sub_menu:
-                        num = 1
-                        menu_dict = {}
-                        for file in files_set:
-                            print str(num) + ". " + file.get_name(),
-                            if file in restore_set:
-                                print "+"
-                            else:
-                                print ""
-                            menu_dict[num] = file
-                            num += 1
-                        print "\n"
-                        print "0." + " Select files\n", "(O)k - restore!\n", "(Q)uit\n", "(E)xit\n"
-                        choice = raw_input("Enter your choice: ")
-                        if choice.upper() == 'Q':
-                            sub_menu = False
-                            sub_sub_menu = False
-                        elif choice.upper() == 'E':
-                            menu_run = False
-                            sub_menu = False
-                            sub_sub_menu = False
-                        elif not choice.isalpha() and int(choice) > 0 and int(choice) < num:
-                            restore_set.add(menu_dict[int(choice)])
-                        elif choice == '0':
-                             restore_set = files_set
-                        elif str(choice).upper() == 'O':
-                            if files_set:
-                                storage.restore(date, profile, time, files_set)
-                        else:
-                            print "The are no " + choice + " in menu"
-
+                        logger.info(storage.name + " " + profile + " successfully save.")
         else:
-            print "The are no " + choice + " in menu" 
-    
-    
-
-menu()
+            print "Check profile and storage list!"
+            logger.warn('BackUp stop')
 
 
+main(argv[1:])
