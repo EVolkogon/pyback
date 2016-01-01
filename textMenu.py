@@ -1,4 +1,5 @@
 from config import CONFIG
+from stordata import Data, Storage
 def menu():
     """
     This version of menu just for test/dev period.
