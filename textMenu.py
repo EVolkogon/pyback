@@ -125,9 +125,9 @@ def menu():
         #menu branch for non correct enter
             sub_menu = True
             storage = Storage(CONFIG['STORAGES']['STOR_1']) #''
-            date = '20151224'#''
-            profile = 'LONERS'
-            time = '18329'
+            date = ''
+            profile = ''
+            time = ''
             files  = ''
             while sub_menu:
                 if storage and date: storage.set_current_date(date)
