@@ -165,9 +165,9 @@ def menu():
 
                 elif not time:
                     print "Set time"
-                    [printf(x) for x in storage.get_time_folders( )]
-                    current_time = raw_input("Example: "+ storage.get_time_folders()[0] + "\nEnter time: ")
-                    if current_time in set(storage.get_time_folders()):
+                    [printf(x) for x in storage.get_time_folders(profile)]
+                    current_time = raw_input("Example: " + storage.get_time_folders(profile)[0] + "\nEnter time: ")
+                    if current_time in set(storage.get_time_folders(profile)):
                         time = current_time
                     elif current_time.upper() == 'Q':
                         sub_menu = False
@@ -204,7 +204,13 @@ def menu():
                              restore_set = files_set
                         elif str(choice).upper() == 'O':
                             if files_set:
-                                storage.restore(date, profile, time, files_set)
+                                if storage.restore(date, profile, time, files_set):
+                                    print "error restore"
+                                else:
+                                    print "Restore finish"
+                                    sub_menu = False
+                                    sub_sub_menu = False
+
                         else:
                             print "The are no " + choice + " in menu"
 
