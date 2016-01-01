@@ -1,0 +1,4 @@
+2016-01-01 15:42:28,965 - INFO - BackUp start
+2016-01-01 15:42:28,967 - INFO - DIR_FOR_BKP Ok!
+2016-01-01 15:42:28,977 - ERROR - Problem to save data from profile - LONERS
+2016-01-01 15:42:28,977 - ERROR - error: folder_for_save
