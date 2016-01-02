@@ -3,12 +3,14 @@ from stordata import Data, Storage
 from config import CONFIG
 from sys import argv, exit
 from getopt import getopt, GetoptError
+from os import path
 import logging
 
 # start initialization logging. Take from https://docs.python.org/2/howto/logging-cookbook.html#logging-cookbook
+script_path = path.dirname(path.realpath(__file__))
 logger = logging.getLogger(' ')
 logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler('log.txt')
+fh = logging.FileHandler(script_path+'/log.txt')
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 fh.setFormatter(formatter)
 logger.addHandler(fh)
