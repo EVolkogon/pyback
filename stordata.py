@@ -167,7 +167,10 @@ class Storage ( object ):
             return "Successfully set folder:  " + date
         else:
             return "No folder with date: " + date
-            
+
+    def set_name(self, name):
+        """Method for add not default storage name"""
+        self.name = str(name)
     #restore methods
     
     def restore ( self, date, profile , time, restore_list ) :

@@ -31,6 +31,7 @@ def menu():
                     if num in choice_set:
                         print "+"
                         new_store = Storage(CONFIG["STORAGES"][storage])
+                        new_store.set_name(storage)
                         if new_store.get_status():
                             storage_set.add(new_store)
                         else:
@@ -52,6 +53,7 @@ def menu():
                     sub_num = 1
                     for storage in CONFIG["STORAGES"].keys():
                         new_store = Storage(CONFIG["STORAGES"][storage])
+                        new_store.set_name(storage)
                         if new_store.get_status():
                             storage_set.add(new_store)
                             choice_set.add(sub_num)
@@ -124,7 +126,7 @@ def menu():
         elif choice.upper() == 'R':
         #menu branch for non correct enter
             sub_menu = True
-            storage = Storage(CONFIG['STORAGES']['STOR_1']) #''
+            storage = ''
             date = ''
             profile = ''
             time = ''
@@ -136,7 +138,9 @@ def menu():
                     [printf(x) for x in CONFIG['STORAGES'].keys()]
                     current_storage = raw_input("Example: "+ CONFIG['STORAGES'].keys()[0] + "\nEnter Storage name: ")
                     if current_storage in set(CONFIG['STORAGES'].keys()):
-                        storage = Storage(CONFIG['STORAGES'][current_storage])
+                        storage_obj = Storage(CONFIG['STORAGES'][current_storage])
+                        storage_obj.set_name(storage)
+                        storage = storage_obj
                     elif current_storage.upper() == 'Q':
                         sub_menu = False
                     else:

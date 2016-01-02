@@ -39,7 +39,11 @@ def main(argv):
     if profile_list and storage_list:
         logger.info('BackUp start')
         if set(storage_list) == set(CONFIG["STORAGES"].keys()):
-            storage_obj_list = [Storage(CONFIG["STORAGES"][storage]) for storage in storage_list]
+            storage_obj_list = []
+            for storage in storage_list:
+                storage_obj = Storage(CONFIG["STORAGES"][storage])
+                storage_obj.set_name(storage)
+                storage_obj_list.append(storage_obj)
             # check store status and write to log
             for obj in storage_obj_list:
                 if obj.get_status():
@@ -56,7 +60,7 @@ def main(argv):
                         for data_error in status:
                             logger.error(data_error)
                     else:
-                        logger.info(storage.name + " " + profile + " successfully save.")
+                        logger.info(storage.name + " " + profile + " successfully save")
         else:
             print "Check profile and storage list!"
             logger.warn('BackUp stop')
