@@ -1,3 +1,4 @@
+#! /usr/bin/python
 """
 This module create(generate) json config file
 """
