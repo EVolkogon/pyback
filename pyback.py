@@ -1,25 +1,34 @@
 #! /usr/bin/python
-from stordata import Data, Storage 
-from config import CONFIG
+from stordata import Data, Storage
 from sys import argv, exit
 from getopt import getopt, GetoptError
 from os import path
-import logging
+from json import load
+from logging import Formatter, FileHandler, getLogger, DEBUG
 
-# start initialization logging. Take from https://docs.python.org/2/howto/logging-cookbook.html#logging-cookbook
-script_path = path.dirname(path.realpath(__file__))
-logger = logging.getLogger(' ')
-logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler(script_path+'/log.txt')
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+script_path = path.dirname(path.realpath(__file__))  # set current script folder
+
+# initializing logging. Take from https://docs.python.org/2/howto/logging-cookbook.html#logging-cookbook
+logger = getLogger(' ')
+logger.setLevel(DEBUG)
+fh = FileHandler(script_path + '/log.txt')
+formatter = Formatter('%(asctime)s - %(levelname)s - %(message)s')
 fh.setFormatter(formatter)
 logger.addHandler(fh)
-# end logging initialization
-def main(argv):
+# end initializing
+
+# import config from json
+with open(script_path + '/config.json') as json_data_file:
+    CONFIG = load(json_data_file)
+json_data_file.close()
+
+
+def main(argument):
+    global opts
     profile_list = []
     storage_list = []
     try:
-        opts, args = getopt(argv,"mhd:s:",["data=","storages"])
+        opts, args = getopt(argument, "mhd:s:", ["data=", "storages="])
     except GetoptError:
         print "Incorrect key. \nExample: pyback -d PROFILE1,PROFILE2 -s STORAGE1,STORAGE2\n Or try key '-h' for help"
         exit(2)
@@ -30,7 +39,7 @@ def main(argv):
             exit()
         elif opt == "-m":
             from textMenu import menu
-            menu()
+            menu(CONFIG, Data, Storage)
         elif opt in ('-d', 'data'):
             for item in arg.split(','):
                 profile_list.append(item)
@@ -46,7 +55,7 @@ def main(argv):
                 storage_obj = Storage(CONFIG["STORAGES"][storage])
                 storage_obj.set_name(storage)
                 storage_obj_list.append(storage_obj)
-            # check store status and write to log
+            # check storage status and write to log
             for obj in storage_obj_list:
                 if obj.get_status():
                     logger.info(obj.name + " Ok!")
@@ -66,6 +75,5 @@ def main(argv):
         else:
             print "Check profile and storage list!"
             logger.warn('BackUp stop')
-
 
 main(argv[1:])

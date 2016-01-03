@@ -18,6 +18,7 @@ class Data ( object ):
         
     def get_name( self ):
         """Return name of data """
+
         return self.name
         
     def get_location( self ):

@@ -1,10 +1,10 @@
-from config import CONFIG
-from stordata import Data, Storage
-def menu():
+#! /usr/bin/python
+def menu(config, Data, Storage):
     """
     This version of menu just for test/dev period.
     Must be rewritten because it's ugly
     """
+    CONFIG = config
     def printf(text):
 
         print text
