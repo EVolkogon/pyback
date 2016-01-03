@@ -1,17 +1,16 @@
 """
-This is module with configuration. Latter it be rewrite to JSON format.
-Use absolute path ONLY!
+This module create(generate) json config file
 """
-         #Config Name   Config Unit
-
+from os import path
+from json import load, dump
 # dynamic path for test ONLY!
-import os
-script_path = os.path.dirname(os.path.realpath(__file__))
+script_path = path.dirname(path.realpath(__file__))
 
+# default test config
 CONFIG = {  "DATA":     # Profile
                         { "LONERS": #Path
                                     [script_path + "/test/DATA/save_me.txt",
-                                     script_path +"./test/DATA/folder_for_save",
+                                     script_path +"/test/DATA/folder_for_save",
                                       ],
                          "Project" : ["./"],
                         },
@@ -19,3 +18,7 @@ CONFIG = {  "DATA":     # Profile
                         {"STOR_1" :script_path +"/test/DIR_FOR_BKP",
                          },
          }
+
+with open(script_path + '/config.json', 'wb') as json_data_file:
+    dump(CONFIG, json_data_file)
+    json_data_file.close()
