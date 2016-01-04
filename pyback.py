@@ -5,6 +5,7 @@ from getopt import getopt, GetoptError
 from os import path
 from json import load
 from logging import Formatter, FileHandler, getLogger, DEBUG
+import config
 
 script_path = path.dirname(path.realpath(__file__))  # set current script folder
 
@@ -19,16 +20,17 @@ logger.addHandler(fh)
 
 # import config from json
 with open(script_path + '/config.json') as json_data_file:
-    CONFIG = load(json_data_file)
-json_data_file.close()
-
-
+    try:
+        CONFIG = load(json_data_file)
+    except ValueError:
+        CONFIG = {}
+        print "Config not found.\n Try run with --set default or --set base\n Or -h for help"
 def main(argument):
     global opts
     profile_list = []
     storage_list = []
     try:
-        opts, args = getopt(argument, "mhd:s:", ["data=", "storages="])
+        opts, args = getopt(argument, "mhd:s:", ['set_default', 'set_base', 'add_profile=', 'add_path=', 'add_storage='])
     except GetoptError:
         print "Incorrect key. \nExample: pyback -d PROFILE1,PROFILE2 -s STORAGE1,STORAGE2\n Or try key '-h' for help"
         exit(2)
@@ -40,12 +42,27 @@ def main(argument):
         elif opt == "-m":
             from textMenu import menu
             menu(CONFIG, Data, Storage)
-        elif opt in ('-d', 'data'):
+        elif opt == '-d':
             for item in arg.split(','):
                 profile_list.append(item)
-        elif opt in ('-s', 'storages'):
+        elif opt == '-s':
             for item in arg.split(','):
                 storage_list.append(item)
+        elif opt == '--set_default':
+            print "Config set to default"
+            config.set_default_config()
+        elif opt == '--set_base':
+            config.set_base()
+        elif opt == '--add_storage':
+            for pair in arg.split(','):
+                name, s_path = pair.split(':')
+                config.add_storage(name, s_path)
+        elif opt == '--add_profile':
+            config.add_profile(str(arg))
+        elif opt == '--add_path':
+            for pair in arg.split(','):
+                profile, d_path = pair.split(':')
+                config.add_data_path(profile, d_path)
 
     if profile_list and storage_list:
         logger.info('BackUp start')
