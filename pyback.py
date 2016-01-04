@@ -25,12 +25,15 @@ with open(script_path + '/config.json') as json_data_file:
     except ValueError:
         CONFIG = {}
         print "Config not found.\n Try run with --set default or --set base\n Or -h for help"
+
+
 def main(argument):
     global opts
     profile_list = []
     storage_list = []
     try:
-        opts, args = getopt(argument, "mhd:s:", ['set_default', 'set_base', 'add_profile=', 'add_path=', 'add_storage='])
+        opts, args = getopt(argument, "mhd:s:", ['set_default', 'set_base',
+                                                 'add_profile=', 'add_path=', 'add_storage='])
     except GetoptError:
         print "Incorrect key. \nExample: pyback -d PROFILE1,PROFILE2 -s STORAGE1,STORAGE2\n Or try key '-h' for help"
         exit(2)

@@ -56,20 +56,21 @@ def add_profile(profile_name):
         dump(config, json_data_file)
 
 
-def add_data_path(profile_name, path):
+def add_data_path(profile_name, data_path):
     if stat(config_path).st_size == 0:
         print "Config file is empty"
     with open(config_path) as json_data_file:
         config = load(json_data_file)
         if profile_name in config["DATA"].keys():
-            if path in config["DATA"][profile_name]:
-                print "path exist " + path
+            if data_path in config["DATA"][profile_name]:
+                print "path exist " + data_path
             else:
-                config["DATA"][profile_name].append(path)
+                config["DATA"][profile_name].append(data_path)
         else:
             print "No " + profile_name + " in config"
     with open(config_path, 'wb') as json_data_file:
         dump(config, json_data_file)
+
 
 def add_storage(storage_name, storage_path):
     if stat(config_path).st_size == 0:
