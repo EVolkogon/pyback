@@ -98,7 +98,7 @@ def main(argument):
                 if profile in config.get_profile_list():
                     data_obj_list = [Data(data) for data in CONFIG["DATA"][profile]]
                     for storage in storage_obj_list:
-                        if storage in config.get_storage_list():
+                        if str(storage) in config.get_storage_list():
                             status = storage.save(profile, data_obj_list)
                             # if for log
                             if status:
