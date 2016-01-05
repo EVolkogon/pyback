@@ -120,11 +120,7 @@ with open(script_path + '/config.json') as json_data_file:
     try:
         CONFIG = load(json_data_file)
         main(argv[1:])
-        # test block
-        # print config.get_profile_list()
-        # print config.get_path_list(config.get_profile_list()[0])
-        # print config.get_storage_list()
-        # end testy block
+
     except ValueError:
         if len(argv) > 1:
             if 'set' not in argv[1]:
