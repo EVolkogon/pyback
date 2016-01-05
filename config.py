@@ -10,7 +10,7 @@ script_path = path.dirname(path.realpath(__file__))
 config_path = script_path + "/config.json"
 # default test config
 DEF_CONFIG = {"DATA":  # Profile
-                  {"LONERS":  # Path
+                  {'LONERS':  # Path
                        [script_path + "/test/DATA/save_me.txt",
                         script_path + "/test/DATA/folder_for_save",
                         ],
@@ -47,7 +47,7 @@ def set_base():
 
 def add_profile(profile_name):
     if stat(config_path).st_size == 0:
-        create_not_zero_json()
+        print "Config file is empty"
     with open(config_path) as json_data_file:
         config = load(json_data_file)
         if profile_name not in config["DATA"].keys():
@@ -81,3 +81,65 @@ def add_storage(storage_name, storage_path):
             config["STORAGES"][storage_name] = storage_path
     with open(config_path, 'wb') as json_data_file:
         dump(config, json_data_file)
+
+
+def del_profile(profile_name):
+    if stat(config_path).st_size == 0:
+        create_not_zero_json()
+    with open(config_path) as json_data_file:
+        config = load(json_data_file)
+        if profile_name in config["DATA"].keys():
+            del config["DATA"][profile_name]
+        else:
+            print "No profile with name - " + profile_name
+    with open(config_path, 'wb') as json_data_file:
+        dump(config, json_data_file)
+
+
+def del_path(profile_name, data_path):
+    with open(config_path) as json_data_file:
+        config = load(json_data_file)
+        if profile_name in config["DATA"].keys():
+            if data_path in config["DATA"][profile_name]:
+                del config["DATA"][profile_name][config["DATA"][profile_name].index(data_path)]
+            else:
+                print "No " + data_path + " in config"
+        else:
+            print "No " + profile_name + " in config"
+    with open(config_path, 'wb') as json_data_file:
+        dump(config, json_data_file)
+
+
+def del_storage(storage_name):
+    with open(config_path) as json_data_file:
+        config = load(json_data_file)
+        if storage_name in config["STORAGES"].keys():
+            del config["STORAGES"][storage_name]
+        else:
+            print "No " + storage_name + " in config"
+    with open(config_path, 'wb') as json_data_file:
+        dump(config, json_data_file)
+
+
+def get_profile_list():
+    if stat(config_path).st_size == 0:
+        print "Config file is empty"
+    with open(config_path) as json_data_file:
+        config = load(json_data_file)
+        return config["DATA"].keys()
+
+
+def get_path_list(profile_name):
+    if stat(config_path).st_size == 0:
+        print "Config file is empty"
+    with open(config_path) as json_data_file:
+        config = load(json_data_file)
+        return config["DATA"][profile_name]
+
+
+def get_storage_list():
+    if stat(config_path).st_size == 0:
+        print "Config file is empty"
+    with open(config_path) as json_data_file:
+        config = load(json_data_file)
+        return config["STORAGES"].keys()

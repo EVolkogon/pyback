@@ -19,12 +19,6 @@ logger.addHandler(fh)
 # end initializing
 
 # import config from json
-with open(script_path + '/config.json') as json_data_file:
-    try:
-        CONFIG = load(json_data_file)
-    except ValueError:
-        CONFIG = {}
-        print "Config not found.\n Try run with --set default or --set base\n Or -h for help"
 
 
 def main(argument):
@@ -33,7 +27,8 @@ def main(argument):
     storage_list = []
     try:
         opts, args = getopt(argument, "mhd:s:", ['set_default', 'set_base',
-                                                 'add_profile=', 'add_path=', 'add_storage='])
+                                                 'add_profile=', 'add_path=', 'add_storage=',
+                                                 'del_profile=', 'del_path=', 'del_storage='])
     except GetoptError:
         print "Incorrect key. \nExample: pyback -d PROFILE1,PROFILE2 -s STORAGE1,STORAGE2\n Or try key '-h' for help"
         exit(2)
@@ -45,27 +40,44 @@ def main(argument):
         elif opt == "-m":
             from textMenu import menu
             menu(CONFIG, Data, Storage)
+
         elif opt == '-d':
             for item in arg.split(','):
                 profile_list.append(item)
+
         elif opt == '-s':
             for item in arg.split(','):
                 storage_list.append(item)
+
         elif opt == '--set_default':
             print "Config set to default"
             config.set_default_config()
+
         elif opt == '--set_base':
             config.set_base()
+
         elif opt == '--add_storage':
             for pair in arg.split(','):
                 name, s_path = pair.split(':')
                 config.add_storage(name, s_path)
+
         elif opt == '--add_profile':
             config.add_profile(str(arg))
+
         elif opt == '--add_path':
             for pair in arg.split(','):
                 profile, d_path = pair.split(':')
                 config.add_data_path(profile, d_path)
+        elif opt == '--del_profile':
+            config.del_profile(arg)
+
+        elif opt == '--del_path':
+            profile, paths = arg.split(':')
+            for data_path in paths.split(','):
+                config.del_path(profile, data_path)
+
+        elif opt == '--del_storage':
+            config.del_storage(arg)
 
     if profile_list and storage_list:
         logger.info('BackUp start')
@@ -81,19 +93,42 @@ def main(argument):
                     logger.info(obj.name + " Ok!")
                 else:
                     logger.error(obj.name + " Check it!!!")
+
             for profile in profile_list:
-                data_obj_list = [Data(data) for data in CONFIG["DATA"][profile]]
-                for storage in storage_obj_list:
-                    status = storage.save(profile, data_obj_list)
-                    # if for log
-                    if status:
-                        logger.error("Problem to save data from profile - " + profile)
-                        for data_error in status:
-                            logger.error(data_error)
-                    else:
-                        logger.info(storage.name + " " + profile + " successfully save")
+                if profile in config.get_profile_list():
+                    data_obj_list = [Data(data) for data in CONFIG["DATA"][profile]]
+                    for storage in storage_obj_list:
+                        if storage in config.get_storage_list():
+                            status = storage.save(profile, data_obj_list)
+                            # if for log
+                            if status:
+                                logger.error("Problem to save data from profile - " + profile)
+                                for data_error in status:
+                                    logger.error(data_error)
+                            else:
+                                logger.info(storage.name + " " + profile + " successfully save")
+                        else:
+                            print "No " + storage + " in config"
+                else:
+                    print "No " + profile + " in config"
         else:
             print "Check profile and storage list!"
             logger.warn('BackUp stop')
 
-main(argv[1:])
+
+with open(script_path + '/config.json') as json_data_file:
+    try:
+        CONFIG = load(json_data_file)
+        main(argv[1:])
+        # test block
+        # print config.get_profile_list()
+        # print config.get_path_list(config.get_profile_list()[0])
+        # print config.get_storage_list()
+        # end testy block
+    except ValueError:
+        if len(argv) > 1:
+            if 'set' not in argv[1]:
+                CONFIG = {}
+                print "Config not found.\n Try run with --set default or --set base\n Or -h for help"
+            else:
+                main(argv[1:])
