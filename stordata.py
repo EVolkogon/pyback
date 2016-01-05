@@ -91,6 +91,7 @@ class Storage(object):
         if len(parse_from_cfg) > 1:
             self.lifenumber = parse_from_cfg[1]
             self.__del_old_fold()
+
     def get_status(self):
         """Return status of backup storage"""
         return self.status
@@ -140,7 +141,6 @@ class Storage(object):
             sort_date_fold = sorted(self.get_date_folders(), reverse=True)
             if self.current_date.split('/')[-1] in sort_date_fold:
                 del sort_date_fold[sort_date_fold.index(self.current_date.split('/')[-1])]
-            print sort_date_fold
             list_for_delete = sort_date_fold[int(self.lifenumber):]
             for folder in list_for_delete:
                 del_cmd = "rm -rf " + self.path + "/" + folder
