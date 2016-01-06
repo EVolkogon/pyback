@@ -1,4 +1,26 @@
 #! /usr/bin/python
+"""
+SYNOPSIS
+
+    pyback [-d] data_profile [-s] storage ['set_default', 'set_base',
+                                                 'add_profile=', 'add_path=', 'add_storage=',
+                                                 'del_profile=', 'del_path=', 'del_storage=']
+
+DESCRIPTION
+
+    TODO This describes how to use this script. This docstring
+    will be printed by the script if there is an error or
+    if the user requests help (-h or --help).
+
+EXAMPLES
+
+    TODO: Show some examples of how to use this script.
+
+
+AUTHOR
+
+    TODO: Name <name@example.org>
+"""
 from stordata import Data, Storage
 from sys import argv, exit
 from getopt import getopt, GetoptError
@@ -34,8 +56,7 @@ def main(argument):
         exit(2)
     for opt, arg in opts:
         if opt == "-h":
-            print "\nExample: pyback -d PROFILE1,PROFILE2 -s STORAGE1,STORAGE2"
-            print "-m for menu"
+            print __doc__
             exit()
         elif opt == "-m":
             from textMenu import menu
