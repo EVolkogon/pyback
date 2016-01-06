@@ -6,3 +6,10 @@
 2016-01-01 15:56:30,568 - INFO - DIR_FOR_BKP Ok!
 2016-01-01 15:56:30,689 - ERROR - Problem to save data from profile - LONERS
 2016-01-01 15:56:30,689 - ERROR - error: folder_for_save
+2016-01-06 15:49:57,601 - INFO - BackUp start
+2016-01-06 15:49:57,665 - INFO - STOR_1 Ok!
+2016-01-06 15:49:57,803 - ERROR - Problem to save data from profile - M_TEST
+2016-01-06 15:49:57,803 - ERROR - error: 
+2016-01-06 15:51:12,284 - INFO - BackUp start
+2016-01-06 15:51:12,284 - INFO - STOR_1 Ok!
+2016-01-06 15:51:12,372 - INFO - STOR_1 M_TEST successfully save

@@ -2,24 +2,47 @@
 """
 SYNOPSIS
 
-    pyback [-d] data_profile [-s] storage ['set_default', 'set_base',
-                                                 'add_profile=', 'add_path=', 'add_storage=',
-                                                 'del_profile=', 'del_path=', 'del_storage=']
+    pyback [-d] data_profile [-s] storage ['--set_default', '--set_base',
+                                                 '--add_profile', '--add_path', '--add_storage',
+                                                 '--del_profile', '--del_path', '--del_storage']
 
 DESCRIPTION
 
-    TODO This describes how to use this script. This docstring
-    will be printed by the script if there is an error or
-    if the user requests help (-h or --help).
+    This script create file and folder backup in your safe storage(s).
+    Also it help you to create configuration for your backups.
+
+    It very easy to use: consolidate your data in 'profile(s)', add your storages
+    and save what/where/when you want in one short command(Cron) line.
+    See more in examples
 
 EXAMPLES
 
-    TODO: Show some examples of how to use this script.
+    For example we create apache2 backup in 4 steps.
+
+    0) If it's your first script run, you must create basic config.
+        all you need just run script with key ''--set_base':
+                pyback.py --set_base
+
+    1) Add profile "APACH":
+                pyback.py --add_profile APACH
+
+    2) Add data path(s) to Profile:
+                pyback.py --add_path APACH:/etc/apache2/apache2.conf,/etc/apache2/sites-enabled,/mnt/www/sites
+
+    3) Add name and path to safe folder:
+                pyback.py --add_storage STOR_1:/mnt/backup_folder/
+    4) Now you ready to backup your data:
+                pyback.py -d APACH -s STOR_1
+
+
+    Before you start save your data, practice on test folder. For it just load default config:
+                pyback.py --set_default
 
 
 AUTHOR
 
-    TODO: Name <name@example.org>
+    E.Volkogon: e.volgon@gmail.com
+    github:     https://github.com/EVolkogon
 """
 from stordata import Data, Storage
 from sys import argv, exit
@@ -86,9 +109,9 @@ def main(argument):
             config.add_profile(str(arg))
 
         elif opt == '--add_path':
-            for pair in arg.split(','):
-                profile, d_path = pair.split(':')
-                config.add_data_path(profile, d_path)
+            profile, paths = arg.split(':')
+            for data_path in paths.split(','):
+                config.add_data_path(profile, data_path)
         elif opt == '--del_profile':
             config.del_profile(arg)
 
@@ -146,6 +169,6 @@ with open(script_path + '/config.json') as json_data_file:
         if len(argv) > 1:
             if 'set' not in argv[1]:
                 CONFIG = {}
-                print "Config not found.\n Try run with --set default or --set base\n Or -h for help"
+                print "Check config.\n Try run with --set default or --set base\n Or -h for help"
             else:
                 main(argv[1:])
