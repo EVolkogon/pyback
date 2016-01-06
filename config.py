@@ -33,6 +33,7 @@ def set_default_config():
 
 
 def set_base():
+    # create config with empty values
     run = True
     while run:
         answer = raw_input("Are you sure?!(Y/n)")
