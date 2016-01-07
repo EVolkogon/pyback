@@ -159,7 +159,7 @@ def main(argument):
             print "Check profile and storage list!"
             logger.warn('BackUp stop')
 
-
+# need rewrite (in next open task) to another non zero file check.
 with open(script_path + '/config.json') as json_data_file:
     try:
         CONFIG = load(json_data_file)
