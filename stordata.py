@@ -2,9 +2,9 @@
 """
 File with classes for backup script
 """
-import os
-import shutil
-from os import system, walk
+
+from shutil import rmtree
+from os import system, walk, makedirs, path
 from datetime import datetime
 
 
@@ -15,8 +15,8 @@ class Data(object):
     def __init__(self, path_to_data):
         """ """
         self.path = path_to_data
-        self.name = os.path.basename(path_to_data)
-        self.path_location = os.path.dirname(path_to_data)
+        self.name = path.basename(path_to_data)
+        self.path_location = path.dirname(path_to_data)
 
     def get_name(self):
         """Return name of data """
@@ -33,7 +33,7 @@ class Data(object):
             create archive with data and put archive to backup storage.
             If something wrong method return False.
         """
-        backup_path = os.path.join(path_to_save, self.name + '.tar.gz')
+        backup_path = path.join(path_to_save, self.name + '.tar.gz')
 
         save = str("cd " + self.path_location
                    + " && tar -czpf "
@@ -49,7 +49,7 @@ class Data(object):
     def restore_data(self, path_to_save):
         """This method take path to backup storage as argument,
             and restore data from archive to vanilla data path"""
-        path_to_restore = os.path.join(path_to_save, self.name + '.tar.gz')
+        path_to_restore = path.join(path_to_save, self.name + '.tar.gz')
         restore = str("tar" + " -xzpf "
                       + path_to_restore
                       + " -C " + self.path_location)
@@ -89,7 +89,7 @@ class Storage(object):
         # base
         self.status = True
         self.path = parse_from_cfg[0]
-        self.name = os.path.basename(self.path)
+        self.name = path.basename(self.path)
         # set now date as current work folder
         self.current_date = self.path  # set folder for current actual backup
         if self.__create_current_date_folder() != 0:
@@ -107,15 +107,15 @@ class Storage(object):
     @staticmethod
     def __create_folder(path_to_fold, fold_name):
         """ This method create folder """
-        new_folder = os.path.join(path_to_fold, fold_name)
+        new_folder = path.join(path_to_fold, fold_name)
 
         # return a tuple where first is execute
         # code (0 - is good!), second is new path
         try:
-            os.makedirs(new_folder)
-            return (0, new_folder)
+            makedirs(new_folder)
+            return 0, new_folder
         except OSError:
-            return (13, new_folder)
+            return 13, new_folder
 
     def __create_current_date_folder(self):
         """This method create folder with current date. If be any problem in this method
@@ -134,7 +134,7 @@ class Storage(object):
             else:
                 return res[0]
         else:
-            self.current_date = os.path.join(self.path, now_folder)
+            self.current_date = path.join(self.path, now_folder)
             return 0
 
     def __create_profile_folder(self, profile):
@@ -143,7 +143,7 @@ class Storage(object):
         if profile not in profile_fold_list:
             return self.__create_folder(self.current_date, profile)
         else:
-            return 0, os.path.join(self.current_date, profile)
+            return 0, path.join(self.current_date, profile)
 
     def __del_old_fold(self):
         """
@@ -151,7 +151,7 @@ class Storage(object):
         """
         if 0 < int(self.lifenumber) < len(self.get_date_folders()):
             sort_date_fold = sorted(self.get_date_folders(), reverse=True)
-            current_date = os.path.basename(self.current_date)
+            current_date = path.basename(self.current_date)
             # never delete folder with current date
             if current_date in sort_date_fold:
                 del sort_date_fold[sort_date_fold.index(current_date)]
@@ -159,8 +159,8 @@ class Storage(object):
             # create list for delete and, surprise: delete it's!
             list_for_delete = sort_date_fold[int(self.lifenumber):]
             for folder in list_for_delete:
-                folder_to_delete = os.path.join(self.path, folder)
-                shutil.rmtree(folder_to_delete)
+                folder_to_delete = path.join(self.path, folder)
+                rmtree(folder_to_delete)
 
     def save(self, profile, data_obj_list):
         """ Take data profile and list of Data objects.
@@ -195,18 +195,18 @@ class Storage(object):
 
     def get_time_folders(self, profile):
         """Return time-folders from profile folder"""
-        return [fold for fold in walk(os.path.join(self.current_date, profile)).next()[1]]
+        return [fold for fold in walk(path.join(self.current_date, profile)).next()[1]]
 
     def get_backup_files(self, profile, time):
         """Return all data from time"""
-        return [fold for fold in walk(os.path.join(self.current_date, profile, time)).next()[2]]
+        return [fold for fold in walk(path.join(self.current_date, profile, time)).next()[2]]
 
     # methods set
 
     def set_current_date(self, date):
         """ Set current folder for work"""
         if date in set([fold for fold in walk(self.path).next()[1]]):
-            self.current_date = os.path.join(self.path, date)
+            self.current_date = path.join(self.path, date)
             return "Successfully set folder:  " + date
         else:
             return "No folder with date: " + date
@@ -221,7 +221,7 @@ class Storage(object):
         """Get all information about path to archive with data
             and data list objects to restore.
             if restore end with errors, method return list with problem data"""
-        restore_path = os.path.join(self.path, date, profile, time)
+        restore_path = path.join(self.path, date, profile, time)
         status = []
         for data_obj in restore_list:
             if not data_obj.restore_data(restore_path):
@@ -239,8 +239,3 @@ class Storage(object):
 
     def __hash__(self):
         return hash(self.name)
-
-
-if __name__ == "__main__":
-    test_storage_obj = Storage("/home/manhunter/py_folder/PycharmProject/pyback/test/DIR_FOR_BKP*1")
-    print test_storage_obj.set_current_date('2016-1-6')
