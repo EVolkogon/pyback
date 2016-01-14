@@ -21,15 +21,23 @@ DEF_CONFIG = {"DATA":  # Profile
               }
 
 
+def write_to_json(func):
+    def open_and_write(*args):
+        with open(config_path, 'w') as json_data_file:
+            dump(func(*args), json_data_file)
+    return open_and_write
+
+
+@write_to_json
 def create_not_zero_json():
-    base = {"STORAGES": {}, "DATA": {}}
-    with open(config_path) as json_data_file:
-        dump(base, json_data_file)
+
+    return {"STORAGES": {}, "DATA": {}}
 
 
+@write_to_json
 def set_default_config():
-    with open(config_path) as json_data_file:
-        dump(DEF_CONFIG, json_data_file)
+
+    return DEF_CONFIG
 
 
 def set_base():
@@ -45,7 +53,7 @@ def set_base():
         else:
             print "Please repeat your answer. Only Y or N"
 
-
+@write_to_json
 def add_profile(profile_name):
     if stat(config_path).st_size == 0:
         print "Config file is empty"
@@ -53,8 +61,8 @@ def add_profile(profile_name):
         config = load(json_data_file)
         if profile_name not in config["DATA"].keys():
             config["DATA"][profile_name] = []
-    with open(config_path) as json_data_file:
-        dump(config, json_data_file)
+
+    return config
 
 
 def add_data_path(profile_name, data_path):
