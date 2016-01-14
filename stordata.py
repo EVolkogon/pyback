@@ -49,8 +49,9 @@ class Data(object):
     def restore_data(self, path_to_save):
         """This method take path to backup storage as argument,
             and restore data from archive to vanilla data path"""
+        path_to_restore = os.path.join(path_to_save, self.name + '.tar.gz')
         restore = str("tar" + " -xzpf "
-                      + path_to_save + self.name + ".tar.gz"
+                      + path_to_restore
                       + " -C " + self.path_location)
         res = system(restore)  # run execute and store result of command
         if res == 0:
@@ -151,8 +152,11 @@ class Storage(object):
         if 0 < int(self.lifenumber) < len(self.get_date_folders()):
             sort_date_fold = sorted(self.get_date_folders(), reverse=True)
             current_date = os.path.basename(self.current_date)
+            # never delete folder with current date
             if current_date in sort_date_fold:
                 del sort_date_fold[sort_date_fold.index(current_date)]
+
+            # create list for delete and, surprise: delete it's!
             list_for_delete = sort_date_fold[int(self.lifenumber):]
             for folder in list_for_delete:
                 folder_to_delete = os.path.join(self.path, folder)
@@ -191,18 +195,18 @@ class Storage(object):
 
     def get_time_folders(self, profile):
         """Return time-folders from profile folder"""
-        return [fold for fold in walk(self.current_date + "/" + profile).next()[1]]
+        return [fold for fold in walk(os.path.join(self.current_date, profile)).next()[1]]
 
     def get_backup_files(self, profile, time):
         """Return all data from time"""
-        return [fold for fold in walk(self.current_date + "/" + profile + "/" + time).next()[2]]
+        return [fold for fold in walk(os.path.join(self.current_date, profile, time)).next()[2]]
 
     # methods set
 
     def set_current_date(self, date):
         """ Set current folder for work"""
         if date in set([fold for fold in walk(self.path).next()[1]]):
-            self.current_date = self.path + "/" + date
+            self.current_date = os.path.join(self.path, date)
             return "Successfully set folder:  " + date
         else:
             return "No folder with date: " + date
@@ -217,7 +221,7 @@ class Storage(object):
         """Get all information about path to archive with data
             and data list objects to restore.
             if restore end with errors, method return list with problem data"""
-        restore_path = self.path + "/" + date + "/" + profile + "/" + time + "/"
+        restore_path = os.path.join(self.path, date, profile, time)
         status = []
         for data_obj in restore_list:
             if not data_obj.restore_data(restore_path):
@@ -239,4 +243,4 @@ class Storage(object):
 
 if __name__ == "__main__":
     test_storage_obj = Storage("/home/manhunter/py_folder/PycharmProject/pyback/test/DIR_FOR_BKP*1")
-    test_storage_obj.get_time_folders('LONERS')
+    print test_storage_obj.set_current_date('2016-1-6')
