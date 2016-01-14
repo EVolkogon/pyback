@@ -3,6 +3,7 @@
 File with classes for backup script
 """
 import os
+import shutil
 from os import system, walk
 from datetime import datetime
 
@@ -132,7 +133,7 @@ class Storage(object):
             else:
                 return res[0]
         else:
-            self.current_date = self.path + "/" + "%s-%s-%s" % (now.year, now.month, now.day)
+            self.current_date = os.path.join(self.path, now_folder)
             return 0
 
     def __create_profile_folder(self, profile):
@@ -141,20 +142,21 @@ class Storage(object):
         if profile not in profile_fold_list:
             return self.__create_folder(self.current_date, profile)
         else:
-            return 0, self.current_date + "/" + profile
+            return 0, os.path.join(self.current_date, profile)
 
     def __del_old_fold(self):
         """
-        Use self.lifetime parameter(in days) to delete old folders
+        Use self.lifetime parameter(in number of folders) to delete old folders
         """
         if 0 < int(self.lifenumber) < len(self.get_date_folders()):
             sort_date_fold = sorted(self.get_date_folders(), reverse=True)
-            if self.current_date.split('/')[-1] in sort_date_fold:
-                del sort_date_fold[sort_date_fold.index(self.current_date.split('/')[-1])]
+            current_date = os.path.basename(self.current_date)
+            if current_date in sort_date_fold:
+                del sort_date_fold[sort_date_fold.index(current_date)]
             list_for_delete = sort_date_fold[int(self.lifenumber):]
             for folder in list_for_delete:
-                del_cmd = "rm -rf " + self.path + "/" + folder
-                system(del_cmd)
+                folder_to_delete = os.path.join(self.path, folder)
+                shutil.rmtree(folder_to_delete)
 
     def save(self, profile, data_obj_list):
         """ Take data profile and list of Data objects.
@@ -236,5 +238,5 @@ class Storage(object):
 
 
 if __name__ == "__main__":
-    test_data_obj = Data("/home/manhunter/py_folder/PycharmProject/pyback/test/DATA/save_me.txt")
-    #test_data_obj.save_data("/home/manhunter/py_folder/PycharmProject/pyback/test/DIR_FOR_BKP")
+    test_storage_obj = Storage("/home/manhunter/py_folder/PycharmProject/pyback/test/DIR_FOR_BKP*1")
+    test_storage_obj.get_time_folders('LONERS')
