@@ -2,6 +2,7 @@
 """
 File with classes for backup script
 """
+import os
 from os import system, walk
 from datetime import datetime
 
@@ -13,8 +14,8 @@ class Data(object):
     def __init__(self, path_to_data):
         """ """
         self.path = path_to_data
-        self.name = path_to_data.split('/')[-1]
-        self.path_location = "/".join(path_to_data.split('/')[:-1])
+        self.name = os.path.basename(path_to_data)
+        self.path_location = os.path.dirname(path_to_data)
 
     def get_name(self):
         """Return name of data """
@@ -28,12 +29,16 @@ class Data(object):
 
     def save_data(self, path_to_save):
         """ This method take path to backup storage as argument,
-            create archive with data and put archive to backup storage
+            create archive with data and put archive to backup storage.
+            If something wrong method return False.
         """
+        backup_path = os.path.join(path_to_save, self.name + '.tar.gz')
+
         save = str("cd " + self.path_location
                    + " && tar -czpf "
-                   + "/" + path_to_save + "/" + self.name + ".tar.gz"
+                   + backup_path
                    + " " + self.name)
+
         res = system(save)  # run execute and store result of command
         if res == 0:
             return True
@@ -82,7 +87,7 @@ class Storage(object):
         # base
         self.status = True
         self.path = parse_from_cfg[0]
-        self.name = self.path.split('/')[-1]
+        self.name = os.path.basename(self.path)
         # set now date as current work folder
         self.current_date = self.path  # set folder for current actual backup
         if self.__create_current_date_folder() != 0:
@@ -100,10 +105,15 @@ class Storage(object):
     @staticmethod
     def __create_folder(path_to_fold, fold_name):
         """ This method create folder """
-        new_folder = str("mkdir " + path_to_fold + "/" + fold_name)
-        return (system(new_folder),
-                path_to_fold + "/" + fold_name)  # return a tuple where fistr is execute
-                                                 # code (0 - is good!), second is new path
+        new_folder = os.path.join(path_to_fold, fold_name)
+
+        # return a tuple where first is execute
+        # code (0 - is good!), second is new path
+        try:
+            os.makedirs(new_folder)
+            return (0, new_folder)
+        except OSError:
+            return (13, new_folder)
 
     def __create_current_date_folder(self):
         """This method create folder with current date. If be any problem in this method
@@ -223,3 +233,8 @@ class Storage(object):
 
     def __hash__(self):
         return hash(self.name)
+
+
+if __name__ == "__main__":
+    test_data_obj = Data("/home/manhunter/py_folder/PycharmProject/pyback/test/DATA/save_me.txt")
+    #test_data_obj.save_data("/home/manhunter/py_folder/PycharmProject/pyback/test/DIR_FOR_BKP")

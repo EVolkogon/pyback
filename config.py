@@ -23,12 +23,12 @@ DEF_CONFIG = {"DATA":  # Profile
 
 def create_not_zero_json():
     base = {"STORAGES": {}, "DATA": {}}
-    with open(config_path, 'wb') as json_data_file:
+    with open(config_path) as json_data_file:
         dump(base, json_data_file)
 
 
 def set_default_config():
-    with open(config_path, 'wb') as json_data_file:
+    with open(config_path) as json_data_file:
         dump(DEF_CONFIG, json_data_file)
 
 
@@ -53,7 +53,7 @@ def add_profile(profile_name):
         config = load(json_data_file)
         if profile_name not in config["DATA"].keys():
             config["DATA"][profile_name] = []
-    with open(config_path, 'wb') as json_data_file:
+    with open(config_path) as json_data_file:
         dump(config, json_data_file)
 
 
@@ -80,7 +80,7 @@ def add_storage(storage_name, storage_path):
         config = load(json_data_file)
         if storage_name not in config["STORAGES"].keys():
             config["STORAGES"][storage_name] = storage_path
-    with open(config_path, 'wb') as json_data_file:
+    with open(config_path) as json_data_file:
         dump(config, json_data_file)
 
 
@@ -93,7 +93,7 @@ def del_profile(profile_name):
             del config["DATA"][profile_name]
         else:
             print "No profile with name - " + profile_name
-    with open(config_path, 'wb') as json_data_file:
+    with open(config_path) as json_data_file:
         dump(config, json_data_file)
 
 
@@ -107,7 +107,7 @@ def del_path(profile_name, data_path):
                 print "No " + data_path + " in config"
         else:
             print "No " + profile_name + " in config"
-    with open(config_path, 'wb') as json_data_file:
+    with open(config_path) as json_data_file:
         dump(config, json_data_file)
 
 
@@ -118,7 +118,7 @@ def del_storage(storage_name):
             del config["STORAGES"][storage_name]
         else:
             print "No " + storage_name + " in config"
-    with open(config_path, 'wb') as json_data_file:
+    with open(config_path) as json_data_file:
         dump(config, json_data_file)
 
 
