@@ -4,8 +4,9 @@ File with classes for backup script
 """
 
 from shutil import rmtree
-from os import system, walk, makedirs, path
+from os import walk, makedirs, path
 from datetime import datetime
+from tarfile import open
 
 
 class Data(object):
@@ -33,30 +34,25 @@ class Data(object):
             create archive with data and put archive to backup storage.
             If something wrong method return False.
         """
-        backup_path = path.join(path_to_save, self.name + '.tar.gz')
+        backup_path = path.join(path_to_save, self.name + '.tar.bz2')
 
-        save = str("cd " + self.path_location
-                   + " && tar -czpf "
-                   + backup_path
-                   + " " + self.name)
-
-        res = system(save)  # run execute and store result of command
-        if res == 0:
+        try:
+            with open(backup_path, 'w:bz2') as tar:
+                tar.add(self.path, arcname=self.name, recursive=True)
             return True
-        else:
+        except OSError:
             return False
 
     def restore_data(self, path_to_save):
         """This method take path to backup storage as argument,
             and restore data from archive to vanilla data path"""
-        path_to_restore = path.join(path_to_save, self.name + '.tar.gz')
-        restore = str("tar" + " -xzpf "
-                      + path_to_restore
-                      + " -C " + self.path_location)
-        res = system(restore)  # run execute and store result of command
-        if res == 0:
+        path_to_restore = path.join(path_to_save, self.name + '.tar.bz2')
+
+        try:
+            with open(path_to_restore, 'r:bz2') as tar:
+                tar.extractall(self.path_location)
             return True
-        else:
+        except OSError:
             return False
 
     def __str__(self):
@@ -239,3 +235,8 @@ class Storage(object):
 
     def __hash__(self):
         return hash(self.name)
+
+
+if __name__ == '__main__':
+    data_for_test_obj = Data('/home/manhunter/py_folder/PycharmProject/pyback/test/DATA/save_me.txt')
+    print data_for_test_obj.restore_data('/home/manhunter/py_folder/PycharmProject/pyback/test/DIR_FOR_BKP')
