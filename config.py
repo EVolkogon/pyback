@@ -7,7 +7,7 @@ from json import load, dump
 
 # dynamic path for test ONLY!
 script_path = path.dirname(path.realpath(__file__))
-config_path = script_path + "/config.json"
+config_path = path.join(script_path, "config.json")
 # default test config
 DEF_CONFIG = {"DATA":  # Profile
                   {'LONERS':  # Path
@@ -21,15 +21,45 @@ DEF_CONFIG = {"DATA":  # Profile
               }
 
 
-def create_not_zero_json():
-    base = {"STORAGES": {}, "DATA": {}}
-    with open(config_path, 'w') as json_data_file:
-        dump(base, json_data_file)
+def read_json(func):
+    """
+    Decorator function to read data from json file
+    """
+    if stat(config_path).st_size == 0:
+        print "Config file is empty"
+
+    def open_and_write(*data):
+        with open(config_path) as json_data_file:
+            config = load(json_data_file)
+            return func(config, data)
+    return open_and_write
 
 
-def set_default_config():
-    with open(config_path, 'w') as json_data_file:
-        dump(DEF_CONFIG, json_data_file)
+def read_n_write_to_json(func):
+    """
+    decorator function to read and save data in json file
+    """
+    if stat(config_path).st_size == 0:
+        print "Config file is empty"
+
+    def reader_writer(*data):
+        with open(config_path) as json_data_file:
+            config = load(json_data_file)
+        with open(config_path, 'w') as json_data_file:
+            dump(func(config, data), json_data_file)
+    return reader_writer
+
+
+@read_n_write_to_json
+def create_not_zero_json(config, data):
+    config = {"STORAGES": {}, "DATA": {}}
+    return config
+
+
+@read_n_write_to_json
+def set_default_config(config, data):
+    config = DEF_CONFIG
+    return config
 
 
 def set_base():
@@ -46,101 +76,96 @@ def set_base():
             print "Please repeat your answer. Only Y or N"
 
 
-def add_profile(profile_name):
-    if stat(config_path).st_size == 0:
-        print "Config file is empty"
-    with open(config_path) as json_data_file:
-        config = load(json_data_file)
-        if profile_name not in config["DATA"].keys():
-            config["DATA"][profile_name] = []
-    with open(config_path, 'w') as json_data_file:
-        dump(config, json_data_file)
+@read_n_write_to_json
+def add_profile(config, data):
+    profile_name = data[0]
+    config["DATA"][profile_name] = []
+    return config
 
 
-def add_data_path(profile_name, data_path):
-    if stat(config_path).st_size == 0:
-        print "Config file is empty"
-    with open(config_path) as json_data_file:
-        config = load(json_data_file)
-        if profile_name in config["DATA"].keys():
-            if data_path in config["DATA"][profile_name]:
-                print "path exist " + data_path
-            else:
-                config["DATA"][profile_name].append(data_path)
+@read_n_write_to_json
+def add_data_path(config, data):
+    profile_name = data[0]
+    data_path = data[1]
+
+    if profile_name in config["DATA"].keys():
+        if data_path in config["DATA"][profile_name]:
+            print "path exist " + data_path
         else:
-            print "No " + profile_name + " in config"
-    with open(config_path, 'w') as json_data_file:
-        dump(config, json_data_file)
+            config["DATA"][profile_name].append(data_path)
+    else:
+        print "No " + profile_name + " in config"
+
+    return config
 
 
-def add_storage(storage_name, storage_path):
-    if stat(config_path).st_size == 0:
-        print "Config file is empty"
-    with open(config_path) as json_data_file:
-        config = load(json_data_file)
-        if storage_name not in config["STORAGES"].keys():
-            config["STORAGES"][storage_name] = storage_path
-    with open(config_path, 'w') as json_data_file:
-        dump(config, json_data_file)
+@read_n_write_to_json
+def add_storage(config, data):
+
+    storage_name = data[0]
+    storage_path = data[1]
+
+    if storage_name not in config["STORAGES"].keys():
+        config["STORAGES"][storage_name] = storage_path
+
+    return config
 
 
-def del_profile(profile_name):
-    if stat(config_path).st_size == 0:
-        create_not_zero_json()
-    with open(config_path) as json_data_file:
-        config = load(json_data_file)
-        if profile_name in config["DATA"].keys():
-            del config["DATA"][profile_name]
+@read_n_write_to_json
+def del_profile(config, data):
+
+    profile_name = data[0]
+
+    if profile_name in config["DATA"].keys():
+        del config["DATA"][profile_name]
+    else:
+        print "No profile with name - " + profile_name
+
+    return config
+
+
+@read_n_write_to_json
+def del_path(config, data):
+    profile_name = data[0]
+    data_path = data[1]
+
+    if profile_name in config["DATA"].keys():
+        if data_path in config["DATA"][profile_name]:
+            del config["DATA"][profile_name][config["DATA"][profile_name].index(data_path)]
         else:
-            print "No profile with name - " + profile_name
-    with open(config_path, 'w') as json_data_file:
-        dump(config, json_data_file)
+            print "No " + data_path + " in config"
+    else:
+        print "No " + profile_name + " in config"
+
+    return config
 
 
-def del_path(profile_name, data_path):
-    with open(config_path) as json_data_file:
-        config = load(json_data_file)
-        if profile_name in config["DATA"].keys():
-            if data_path in config["DATA"][profile_name]:
-                del config["DATA"][profile_name][config["DATA"][profile_name].index(data_path)]
-            else:
-                print "No " + data_path + " in config"
-        else:
-            print "No " + profile_name + " in config"
-    with open(config_path, 'w') as json_data_file:
-        dump(config, json_data_file)
+@read_n_write_to_json
+def del_storage(config, data):
+    storage_name = data[0]
+
+    if storage_name in config["STORAGES"].keys():
+        del config["STORAGES"][storage_name]
+    else:
+        print "No " + storage_name + " in config"
+
+    return config
 
 
-def del_storage(storage_name):
-    with open(config_path) as json_data_file:
-        config = load(json_data_file)
-        if storage_name in config["STORAGES"].keys():
-            del config["STORAGES"][storage_name]
-        else:
-            print "No " + storage_name + " in config"
-    with open(config_path, 'w') as json_data_file:
-        dump(config, json_data_file)
+@read_json
+def get_profile_list(config, data):
+
+    return config["DATA"].keys()
 
 
-def get_profile_list():
-    if stat(config_path).st_size == 0:
-        print "Config file is empty"
-    with open(config_path) as json_data_file:
-        config = load(json_data_file)
-        return config["DATA"].keys()
+@read_json
+def get_path_list(config, data):
+    profile_name = data[0]
+
+    return config["DATA"][profile_name]
 
 
-def get_path_list(profile_name):
-    if stat(config_path).st_size == 0:
-        print "Config file is empty"
-    with open(config_path) as json_data_file:
-        config = load(json_data_file)
-        return config["DATA"][profile_name]
+@read_json
+def get_storage_list(config, data):
 
-
-def get_storage_list():
-    if stat(config_path).st_size == 0:
-        print "Config file is empty"
-    with open(config_path) as json_data_file:
-        config = load(json_data_file)
-        return config["STORAGES"].keys()
+    return config["STORAGES"].keys()
