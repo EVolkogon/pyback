@@ -42,12 +42,12 @@ def read_n_write_to_json(func):
     if stat(config_path).st_size == 0:
         print "Config file is empty"
 
-    def reader(*data):
+    def reader_writer(*data):
         with open(config_path) as json_data_file:
             config = load(json_data_file)
         with open(config_path, 'w') as json_data_file:
             dump(func(config, data), json_data_file)
-    return reader
+    return reader_writer
 
 
 @read_n_write_to_json
@@ -161,6 +161,7 @@ def get_profile_list(config, data):
 @read_json
 def get_path_list(config, data):
     profile_name = data[0]
+
     return config["DATA"][profile_name]
 
 

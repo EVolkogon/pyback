@@ -1,1 +1,1 @@
-{"STORAGES": {"test_stor": "/path/to/storage", "test_stor2": "/path/to/storage"}, "DATA": {"yet_another_profile2": [], "yet_another_profile": ["/yet/another/test/path", "/yet/another/test/path2"]}}
+{"STORAGES": {}, "DATA": {}}
