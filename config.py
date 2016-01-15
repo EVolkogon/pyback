@@ -169,7 +169,3 @@ def get_storage_list(config, data):
 
     return config["STORAGES"].keys()
 
-
-
-if __name__ == "__main__":
-    print get_path_list('yet_another_profile')
