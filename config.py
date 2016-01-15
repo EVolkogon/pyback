@@ -25,6 +25,9 @@ def write_to_json(func):
     """
     decorator function to save data in json file
     """
+    if stat(config_path).st_size == 0:
+        print "Config file is empty"
+
     def open_and_write(*args):
         with open(config_path, 'w') as json_data_file:
             dump(func(*args), json_data_file)
@@ -32,6 +35,9 @@ def write_to_json(func):
 
 
 def read_n_write_to_json(func):
+
+    if stat(config_path).st_size == 0:
+        print "Config file is empty"
 
     def reader(*data):
         with open(config_path) as json_data_file:
@@ -41,6 +47,7 @@ def read_n_write_to_json(func):
         with open(config_path, 'w') as json_data_file:
             dump(func(config, data), json_data_file)
     return reader
+
 
 @write_to_json
 def create_not_zero_json():
@@ -75,20 +82,21 @@ def add_profile(config, data):
     return config
 
 
-def add_data_path(profile_name, data_path):
-    if stat(config_path).st_size == 0:
-        print "Config file is empty"
-    with open(config_path) as json_data_file:
-        config = load(json_data_file)
-        if profile_name in config["DATA"].keys():
-            if data_path in config["DATA"][profile_name]:
-                print "path exist " + data_path
-            else:
-                config["DATA"][profile_name].append(data_path)
+@read_n_write_to_json
+def add_data_path(config, data):
+    profile_name = data[0]
+    data_path = data[1]
+
+    if profile_name in config["DATA"].keys():
+        if data_path in config["DATA"][profile_name]:
+            print "path exist " + data_path
         else:
-            print "No " + profile_name + " in config"
-    with open(config_path, 'wb') as json_data_file:
-        dump(config, json_data_file)
+            config["DATA"][profile_name].append(data_path)
+
+    else:
+        print "No " + profile_name + " in config"
+
+    return config
 
 
 def add_storage(storage_name, storage_path):
