@@ -7,7 +7,7 @@ from json import load, dump
 
 # dynamic path for test ONLY!
 script_path = path.dirname(path.realpath(__file__))
-config_path = script_path + "/config.json"
+config_path = path.join(script_path, "config.json")
 # default test config
 DEF_CONFIG = {"DATA":  # Profile
                   {'LONERS':  # Path
@@ -22,11 +22,25 @@ DEF_CONFIG = {"DATA":  # Profile
 
 
 def write_to_json(func):
+    """
+    decorator function to save data in json file
+    """
     def open_and_write(*args):
         with open(config_path, 'w') as json_data_file:
             dump(func(*args), json_data_file)
     return open_and_write
 
+
+def read_n_write_to_json(func):
+
+    def reader(*data):
+        with open(config_path) as json_data_file:
+            config = load(json_data_file)
+            # config = func(config, data)
+            # print config
+        with open(config_path, 'w') as json_data_file:
+            dump(func(config, data), json_data_file)
+    return reader
 
 @write_to_json
 def create_not_zero_json():
@@ -53,15 +67,11 @@ def set_base():
         else:
             print "Please repeat your answer. Only Y or N"
 
-@write_to_json
-def add_profile(profile_name):
-    if stat(config_path).st_size == 0:
-        print "Config file is empty"
-    with open(config_path) as json_data_file:
-        config = load(json_data_file)
-        if profile_name not in config["DATA"].keys():
-            config["DATA"][profile_name] = []
 
+@read_n_write_to_json
+def add_profile(config, data):
+    profile_name = data[0]
+    config["DATA"][profile_name] = []
     return config
 
 
@@ -152,3 +162,7 @@ def get_storage_list():
     with open(config_path) as json_data_file:
         config = load(json_data_file)
         return config["STORAGES"].keys()
+
+
+if __name__ == "__main__":
+    add_profile("M_test")
