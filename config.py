@@ -168,4 +168,3 @@ def get_path_list(config, data):
 def get_storage_list(config, data):
 
     return config["STORAGES"].keys()
-
